@@ -1,0 +1,43 @@
+---
+title: Minimal mistakes jekyll themes
+date: 2023-10-29
+
+#author: "Huy Hung LE"
+#linktitle: CTF playbook
+
+description: 
+categories:
+- Minimal mistakes
+- jekyll
+tags:
+- jekyll
+- Minimal mistakes
+
+---
+
+# Setup
+
+Download the following files and folder:
+- `_data`
+- `config.yml`
+- `index.html`
+- `Gemfile1` create when run `jekyll new <name>`
+- `Gemfile2` from starter template
+
+Modify `Gemfile1` by adding plugin from `Gemfile2`, change gem theme to minimal mistakes, add plugin compose.
+
+
+Modify `config.yml`
+
+    Set name, url, baseurl, sass: quite_deps:true (for hiding warning), search: true, defaults: post: value: toc: true tock_sticky:true; them, skin,...
+
+Note: not use github-page plugin;
+
+Use github action for deploying page in settings.
+
+Run locally:
+```bash
+bundle
+bundle exec jekyll serve
+```
+

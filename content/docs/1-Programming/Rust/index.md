@@ -26,8 +26,8 @@ This is a note from youtube video <https://www.youtube.com/watch?v=BpPEoZW5IiY>
 - The rust programming language
 - Rustlings: small exercises, debug
 - Rust by Example: concise version of the book focusing on code, less text
-- Rust by Practice: Covered in this course. <practice.rs>
-- Office web: <rust-lang.org>, go to `Playground`
+- Rust by Practice: Covered in this course. <https://practice.rs/>
+- Office web: <https://www.rust-lang.org>, go to `Playground`
 
 ## Compile and run
 Compile

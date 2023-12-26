@@ -1,6 +1,6 @@
 ---
 title: Programming
 bookFlatSection: true
-bookCollapseSection: true
+bookCollapseSection: false
 weight: 1
 ---

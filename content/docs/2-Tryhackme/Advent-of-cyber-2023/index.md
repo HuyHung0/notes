@@ -180,7 +180,7 @@ Check Linux Forensics room
 
 
 ## test
-{{< highlight go "linenos=table,hl_lines=8 15-17,linenostart=199" >}}
+{{< highlight go "linenos=table,hl_lines=8 15-17,linenostart=1" >}}
 
 hugo v0.121.1-00b46fed8e47f7bb0a85d7cfc2d9f1356379b740+extended linux/amd64 BuildDate=2023-12-08T08:47:45Z VendorInfo=gohugoio
                    | EN  

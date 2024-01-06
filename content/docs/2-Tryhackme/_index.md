@@ -1,7 +1,7 @@
 ---
 title: Tryhackme
 bookFlatSection: true
-bookCollapseSection: true
+#bookCollapseSection: true
 weight: 2
 ---
 

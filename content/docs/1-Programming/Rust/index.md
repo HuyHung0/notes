@@ -2,7 +2,7 @@
 title: Rust
 date: 2023-12-02
 ---
-{{< expand "Table of contents">}}
+{{< details title="Table of contents" open=false >}}
 - [Rust](#rust)
   - [Introduction](#introduction)
     - [Goals](#goals)
@@ -68,9 +68,14 @@ date: 2023-12-02
     - [String](#string)
       - [Str and \&str - need review](#str-and-str-need-review)
   - [Some small things](#some-small-things)
+  - [Bottom](#bottom)
 
 
-{{</expand>}}
+{{</details>}}
+
+{{< button relref="#bottom" >}}Go to bottom{{</ button >}}
+
+
 # Rust
 This is a note from youtube video <https://www.youtube.com/watch?v=BpPEoZW5IiY>
 and mixed with <https://doc.rust-lang.org/book/title-page.html>.
@@ -937,3 +942,8 @@ println!("{:p}", p)// print the memory address of pointer p
 .push("!");
 
 - `print!()` and `println!()` (with newline)
+
+
+{{< button relref="#rust" >}}Back to top{{</ button >}}
+
+## Bottom

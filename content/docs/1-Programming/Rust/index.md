@@ -11,6 +11,12 @@ date: 2023-12-02
   - [Getting started](#getting-started)
     - [`rustc` - compile and run](#rustc-compile-and-run)
     - [Cargo](#cargo)
+    - [Create library](#create-library)
+    - [Create and run test](#create-and-run-test)
+    - [Test organization](#test-organization)
+      - [The test module and test function](#the-test-module-and-test-function)
+      - [The tests directory](#the-tests-directory)
+    - [Create documentation](#create-documentation)
     - [Guessing game](#guessing-game)
       - [Get user input](#get-user-input)
   - [Common concepts](#common-concepts)
@@ -67,7 +73,25 @@ date: 2023-12-02
   - [Compound types](#compound-types-1)
     - [String](#string)
       - [Str and \&str - need review](#str-and-str-need-review)
+  - [Struct](#struct)
+    - [Examples](#examples)
+    - [Print struct](#print-struct)
+    - [dbg marco](#dbg-marco)
+    - [Method of struct](#method-of-struct)
+    - [Associated functions](#associated-functions)
+  - [Enum](#enum)
+  - [Introduction to module system](#introduction-to-module-system)
+    - [Packages and Crates](#packages-and-crates)
+    - [Module cheat sheet](#module-cheat-sheet)
+    - [Paths - pub keyword - super](#paths-pub-keyword-super)
+    - [use keyword](#use-keyword)
+  - [Common Collections](#common-collections)
+    - [Vectors](#vectors)
+      - [Create a new vector](#create-a-new-vector)
+      - [Strings](#strings)
+      - [hash maps](#hash-maps)
   - [Some small things](#some-small-things)
+  - [Developments tools](#developments-tools)
   - [Bottom](#bottom)
 
 
@@ -145,7 +169,55 @@ Build for release: compile with optimizations.
 ```bash
 cargo build --release
 ```
+### Create library
+```bash
+cargo new <name> --lib
+```
+### Create and run test
+- To run all test (by default, they run in parallel using threads)
+```bash
+cargo test
+```
+Since the tests are running at the same time, you must make sure your test don't depend on each other or on any shared state.
 
+- To see printed values for passing tests as well, run with `--show-output`
+```bash
+cargo test -- --show-output
+```
+
+- To run a single test, pass the test name
+```bash
+cargo test <function>
+```
+
+- To ignore some tests, add `#[ignore]` before the function and after the `#[test]`. Then use
+```bash
+cargo test -- --ignored
+```
+
+- To run all tests whether they're ignored or not
+```bash
+cargo test -- --include-ignored
+```
+
+### Test organization
+#### The test module and test function
+- Annotation with `#[cfg(test)]` before the module: run only when we use `cargo test`, not when use `cargo build`
+- Annotation with `#[test]` before the function
+
+#### The tests directory
+- To run a specific file in the tests directory, use
+```bash
+cargo test --test <name>
+```
+
+
+### Create documentation
+- Use `///` as comment.
+```bash
+cargo doc --open
+```
+- Use `//!` as comment: add documentation to the item that contains the comments rather than to the items following the comments. We typically use these doc comments inside the crate root file or inside a module to document the crate or the module as a whole. (There isn't any code after the last line that begins with `//!`)
 ### Guessing game
 #### Get user input
 - The library is `use std::io;`
@@ -930,8 +1002,233 @@ fn main(){
 ### String
 #### Str and &str - need review
 
+## Struct
+### Examples
+```rust
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+fn main() {
+    let rect1 = Rectangle { width: 30, height: 50 };
+
+    println!("The area of the rectangle is {} square pixels.", area(&rect1));
+}
+fn area(rectangle: &Rectangle)->u32{//borrow the struct rather than take ownership of it, use &Rectangle
+    rectangle.width * rectangle.height
+}
+```
+### Print struct
+If we use
+```rust
+println!("rect1 is {}",rect1);
+```
+It will show error
+```rust
+= help: the trait `std::fmt::Display` is not implemented for `Rectangle`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = note: this error originates in the macro `$crate::format_args_nl` which comes from the expansion of the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `structs` (bin "structs") due to previous error
+```
+We use `{:?}` in the `println!`. But it shows error
+```rust
+= help: the trait `Debug` is not implemented for `Rectangle`
+   = note: add `#[derive(Debug)]` to `Rectangle` or manually `impl Debug for Rectangle`
+   = note: this error originates in the macro `$crate::format_args_nl` which comes from the expansion of the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `Rectangle` with `#[derive(Debug)]`
+   |
+1  + #[derive(Debug)]
+2  | struct Rectangle {
+   |
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `structs` (bin "structs") due to previous error
+```
+
+Finally, we add `#[derive(Debug)]` before `struct`, and use `{:#?}` in `println!` for better output.
+
+### dbg marco
+We can call `dbg!` macro to prints to the standard error console stream. It takes the ownship of an expression, prints the file and line number of where that `dbg!` macro call along with the result, and returns ownership of the value.
 
 
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle { width: 30, height: 50 };
+
+    println!("The area of the rectangle is {} square pixels.", area(&rect1));
+    dbg!(&rect1);
+}
+
+fn area(rectangle: &Rectangle)->u32{
+    dbg!(rectangle.width);
+    dbg!(rectangle.height);
+    rectangle.width * rectangle.height
+}
+```
+
+### Method of struct
+Keyword: `impl`. First argument of method is `self`. We often use `&self`, which is short for `self:&self`. It is very rare to using just `self`.
+
+To call method: `rectangle.area()`
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+// We can put all method inside an `impl`. But here we put in many `impl`
+
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+    let rect2 = Rectangle {
+        width: 10,
+        height: 40,
+    };
+    let rect3 = Rectangle {
+        width: 60,
+        height: 45,
+    };
+    println!("Area: {}",rect1.area());
+    println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));
+    println!("Can rect1 hold rect3? {}", rect1.can_hold(&rect3));
+}
+```
+
+
+### Associated functions
+
+- All function defined within an `impl` block are called associated functions.
+- We can define associated functions that don't have `self` as their first parameter (and thus are not methods) because they don't need an instance of the type to work with.
+- Associated functions that aren't methods are often used for constructors that will return a new instance of the struct. To call this associated function, we use `::` syntax with the struct name. Example `let sq = Rectangle::square(3);`.
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+impl Rectangle {
+    fn square(size: u32) -> Self {
+        Self {
+            width: size,
+            height: size,
+        }
+    }
+}
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!("width: {}",rect1.width);
+    println!("height: {}",rect1.height);
+
+    let sq = Rectangle::square(30);
+    println!("Square: {:#?}",sq);
+}
+```
+## Enum
+Difference between `struct` and `enum` is that
+- `struct` is a kind of `AND`
+- `enum` is a kind of `OR`: one and only one of those variants.
+
+## Introduction to module system
+- Packages: A Cargo feature that lets you build, test, and share crates
+- Crates: A tree of modules that produces a library or executable
+- Modules and use: Let you control the organization, scope, and privacy of paths
+- Paths: A way of naming an item, such as a struct, function, or module
+
+### Packages and Crates
+- A crate is the smalles amount of code that the Rust compiler consider at a time.
+- Two forms:
+  - Binary crates: can compile to an executable that you can run. Each must have a function called `main`
+  - Library crates: don't have a `main` function, and they don't compile to an executable. Instead, they define functionality intended to be shared with multiple projects.
+  - Most of the time, we say `crate` means `library crate`
+
+- A package is a bundle of one or more crates that provides a set of functionality.
+- Contains a `Cargo.toml` file that describes how to build those crates.
+- A package can contain as many binary crates as you want, but at most only one library crate.
+- A package must contain at least one crate, where it is library or binary crate.
+
+- When we use `cargo new project`, it create a `Cargo.toml` file. In the `src` folder, by convention: `main.rs` is the crate root of a binary crate and `lib.rs` is the crate root of a library crate.
+
+### Module cheat sheet
+- Start from the crate root.
+- Declaring modules (in the crate root file): `mod garden;`. The module is
+  - inline, within curly brackets
+  - in file `src/garden.rs`
+  - in file `src/garden/mod.rs`
+- Declaring submodules (in any file other than the crate root): `mod vegetables;`
+  - inline
+  - in the file `src/garden/vegetables.rs`
+  - in file `src/garden/vegetables/mod.rs`
+- Paths to code in modules: `crate::garden::vegetables::Asparagus`
+- Private: code within a module is private from its parent modules by default
+- Public: to make a module public, declare `pub mod` instead of `mod`.
+- To make items within a public module public as well, use `pub` before their declarations.
+- `use` keyword: reduce repetition of long paths. For example: `use crate::garden::vegetables::Asparagus`. Then we only need to write `Asparagus` to make use of that type in the scope.
+
+### Paths - pub keyword - super
+- Absolute paths: `crate::...`
+- Relative paths: the path starts with a name defined at the same level of the module tree.
+- In Rust, all items are private to parent modules by default. But child modules can use the items in their ancestor modules.
+- To use inner parts of child modules, use the `pub` keyword.
+- Relative paths start with parent module: using `super`
+- `struct`: when use `pub`, it is public, but the field inside is private by default
+- `enum`: when use `pub`, all of it variants are public.
+### use keyword
+- Brings paths into scope with the `use` keyword
+- Use nested paths: `use std::{cpm::ORdering, io};`
+- `use std::io::{self, Write};`
+- `use std::collections::*;`
+- Providing new names with the `as` keyword: `use std::io::Result as IoResult;`
+
+## Common Collections
+- A vector allows to store a variable number of values next to each other
+- A string is a collection of characters.
+- A hash map allows to associate a value with a particular key. It's a particular implementation of the more general data structure called a map.
+
+### Vectors
+
+
+#### Create a new vector
+```rust
+let v: Vec<i32> = Vec:new{};
+let w = vec![1,2,3];
+let t = Vec::new();
+t.push(5);
+```
+
+
+#### Strings
+
+
+#### hash maps
 
 ## Some small things
 ```rust
@@ -946,4 +1243,15 @@ println!("{:p}", p)// print the memory address of pointer p
 
 {{< button relref="#rust" >}}Back to top{{</ button >}}
 
+
+## Developments tools
+- `rustfmt`: automatic formatting.
+  - Install `rustup component add rustfmt`
+  - Use: `cargo fmt`
+- `rustfix`: automatic fix compiler warnings
+  - Use: `cargo fix`
+- `clippy`: analyze code
+  - Install: `rustup component add clippy`
+  - Use: `cargo clippy`
+- `rust-analyzer`: IDE integration (has plugin for VSCode)
 ## Bottom
